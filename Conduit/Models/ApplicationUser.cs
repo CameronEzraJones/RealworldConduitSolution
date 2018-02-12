@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Conduit.Models
@@ -23,7 +24,7 @@ namespace Conduit.Models
         [JsonProperty]
         public string Image { get; set; }
 
-        [JsonProperty]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         [NotMapped]
         public string Password { get; set; }
     }
