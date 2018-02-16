@@ -30,16 +30,6 @@ namespace Conduit.Migrations
                 table: "AspNetUsers",
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "Password",
-                table: "AspNetUsers",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Token",
-                table: "AspNetUsers",
-                nullable: true);
-
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
@@ -83,14 +73,6 @@ namespace Conduit.Migrations
 
             migrationBuilder.DropColumn(
                 name: "Image",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "Password",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "Token",
                 table: "AspNetUsers");
 
             migrationBuilder.CreateIndex(
