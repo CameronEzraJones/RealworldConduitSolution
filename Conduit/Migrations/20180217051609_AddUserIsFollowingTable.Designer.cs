@@ -11,9 +11,10 @@ using System;
 namespace Conduit.Migrations
 {
     [DbContext(typeof(ConduitDbContext))]
-    partial class ConduitDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180217051609_AddUserIsFollowingTable")]
+    partial class AddUserIsFollowingTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
