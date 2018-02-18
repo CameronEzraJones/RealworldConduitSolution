@@ -81,8 +81,9 @@ namespace Conduit.Controllers
             var result = await _userManager.CreateAsync(user, user.Password);
             if(result.Succeeded)
             {
+                this.HttpContext.Response.StatusCode = 201;
                 user.Password = null; // Don't return password
-                return Ok(user);
+                return Json(user);
             }
             this.HttpContext.Response.StatusCode = 422;
             var errorResponse = new ErrorResponse();

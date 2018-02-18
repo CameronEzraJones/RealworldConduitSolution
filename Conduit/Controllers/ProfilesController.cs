@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Conduit.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Profiles")]
     public class ProfilesController : Controller
     {
         UserManager<ApplicationUser> _userManager;

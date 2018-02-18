@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Conduit.Models
@@ -27,5 +28,9 @@ namespace Conduit.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         [NotMapped]
         public string Password { get; set; }
+
+        public List<Article> Articles { get; set; }
+
+        public List<Comment> Comments { get; set; }
     }
 }
