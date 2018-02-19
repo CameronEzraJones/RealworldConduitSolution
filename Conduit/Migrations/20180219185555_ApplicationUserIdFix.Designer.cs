@@ -11,8 +11,8 @@ using System;
 namespace Conduit.Migrations
 {
     [DbContext(typeof(ConduitDbContext))]
-    [Migration("20180217213705_AddArticlesAndComments")]
-    partial class AddArticlesAndComments
+    [Migration("20180219185555_ApplicationUserIdFix")]
+    partial class ApplicationUserIdFix
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -81,6 +81,8 @@ namespace Conduit.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("ApplicationUserId");
+
                     b.Property<string>("AuthorId");
 
                     b.Property<string>("Body")
@@ -91,8 +93,6 @@ namespace Conduit.Migrations
                     b.Property<string>("Description")
                         .IsRequired();
 
-                    b.Property<int>("MyProperty");
-
                     b.Property<string>("Slug")
                         .IsRequired();
 
@@ -102,6 +102,8 @@ namespace Conduit.Migrations
                     b.Property<DateTime>("UpdatedAt");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("AuthorId");
 
@@ -126,6 +128,8 @@ namespace Conduit.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("ApplicationUserId");
+
                     b.Property<int>("ArticleId");
 
                     b.Property<string>("AuthorId");
@@ -138,6 +142,8 @@ namespace Conduit.Migrations
                     b.Property<DateTime>("UpdatedAt");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("ArticleId");
 
@@ -338,6 +344,10 @@ namespace Conduit.Migrations
 
             modelBuilder.Entity("Conduit.Models.Article", b =>
                 {
+                    b.HasOne("Conduit.Models.ApplicationUser")
+                        .WithMany("Articles")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("Conduit.Models.Profile", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId");
@@ -358,8 +368,12 @@ namespace Conduit.Migrations
 
             modelBuilder.Entity("Conduit.Models.Comment", b =>
                 {
-                    b.HasOne("Conduit.Models.Article", "Article")
+                    b.HasOne("Conduit.Models.ApplicationUser")
                         .WithMany("Comments")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("Conduit.Models.Article", "Article")
+                        .WithMany()
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade);
 

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Conduit.Contexts;
 using Conduit.Models;
+using Conduit.Models.HTTPTransferObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -62,6 +63,8 @@ namespace Conduit.Controllers
             }
             Profile profile = (Profile)requestedUser;
             profile.IsFollowing = isFollowing;
+            ProfileHTTPTransferObject profileHTTPTransferObject = new ProfileHTTPTransferObject();
+            profileHTTPTransferObject.Profile = profile;
             return Ok(profile);
         }
 
@@ -113,6 +116,8 @@ namespace Conduit.Controllers
             }
             Profile profile = (Profile)requestUser;
             profile.IsFollowing = true;
+            ProfileHTTPTransferObject profileHTTPTransferObject = new ProfileHTTPTransferObject();
+            profileHTTPTransferObject.Profile = profile;
             return Ok(profile);
         }
 
@@ -165,6 +170,8 @@ namespace Conduit.Controllers
             }
             Profile profile = (Profile)requestUser;
             profile.IsFollowing = false;
+            ProfileHTTPTransferObject profileHTTPTransferObject = new ProfileHTTPTransferObject();
+            profileHTTPTransferObject.Profile = profile;
             return Ok(profile);
         }
     }

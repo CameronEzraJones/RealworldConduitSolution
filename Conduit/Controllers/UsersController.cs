@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Conduit.Models;
+using Conduit.Models.HTTPTransferObjects;
 using Conduit.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,19 +37,21 @@ namespace Conduit.Controllers
         // Authenticate a user
         // POST /api/user/login
         [HttpPost("/api/users/login")]
-        public async Task<IActionResult> Authenticate([FromBody] ApplicationUser user)
+        public async Task<IActionResult> Authenticate([FromBody] UserHTTPTransferObject userHTTPTransferObject)
         {
-            ApplicationUser signingInUser = await _userManager.FindByNameAsync(user.UserName);
+            ApplicationUser user = userHTTPTransferObject.User;
+            ApplicationUser signingInUser = await _userManager.FindByEmailAsync(user.Email);
             var result = await _signInManager.PasswordSignInAsync(signingInUser, user.Password, false, false);
             if(result.Succeeded)
             {
-                user.Token = BuildToken(user);
-                user.Password = null;
-                return Ok(user);
+                signingInUser.Token = BuildToken(signingInUser);
+                signingInUser.Password = null;
+                userHTTPTransferObject.User = signingInUser;
+                return Ok(userHTTPTransferObject);
             }
             this.HttpContext.Response.StatusCode = 422;
             var errorResponse = new ErrorResponse();
-            errorResponse.addErrorKey($"An error occured trying to sign in {user.UserName}");
+            errorResponse.addErrorKey($"An error occured trying to sign in {signingInUser.Email}");
             return Json(errorResponse);
         }
 
@@ -76,14 +79,16 @@ namespace Conduit.Controllers
         // POST /api/user
         [HttpPost("/api/users")]
         [RegisterUserValidator]
-        public async Task<IActionResult> Register([FromBody] ApplicationUser user)
+        public async Task<IActionResult> Register([FromBody] UserHTTPTransferObject userHTTPTransferObject)
         {
+            var user = userHTTPTransferObject.User;
             var result = await _userManager.CreateAsync(user, user.Password);
             if(result.Succeeded)
             {
                 this.HttpContext.Response.StatusCode = 201;
                 user.Password = null; // Don't return password
-                return Json(user);
+                userHTTPTransferObject.User = user;
+                return Json(userHTTPTransferObject);
             }
             this.HttpContext.Response.StatusCode = 422;
             var errorResponse = new ErrorResponse();
@@ -99,8 +104,8 @@ namespace Conduit.Controllers
         [HttpGet("/api/user")]
         public async Task<IActionResult> GetUser()
         {
-            var user = HttpContext.User;
-            if(!user.HasClaim(c => 
+            var authedUser = HttpContext.User;
+            if(!authedUser.HasClaim(c => 
             c.Type == ClaimTypes.NameIdentifier))
             {
                 this.HttpContext.Response.StatusCode = 401;
@@ -108,26 +113,28 @@ namespace Conduit.Controllers
                 errorResponse.addErrorKey("Missing authentication");
                 return Json(errorResponse);
             }
-            string authUsername = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            var result = await _userManager.FindByNameAsync(authUsername);
-            if(null == result.UserName)
+            string authUsername = authedUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var user = await _userManager.FindByNameAsync(authUsername);
+            if(null == user.UserName)
             {
                 this.HttpContext.Response.StatusCode = 404;
                 var errorResponse = new ErrorResponse();
                 errorResponse.addErrorKey("No user found with the specified username");
                 return Json(errorResponse);
             }
-            return Ok(result);
+            UserHTTPTransferObject userHTTPTransferObject = new UserHTTPTransferObject();
+            userHTTPTransferObject.User = user;
+            return Ok(userHTTPTransferObject);
 
         }
 
         // Edit a user
         // PUT /api/user
         [HttpPut("/api/user")]
-        public async Task<IActionResult> updateUser([FromBody]ApplicationUser user)
+        public async Task<IActionResult> updateUser([FromBody] UserHTTPTransferObject userHTTPTransferObject)
         {
-            var tokenUser = HttpContext.User;
-            if (!tokenUser.HasClaim(c =>
+            var authedUser = HttpContext.User;
+            if (!authedUser.HasClaim(c =>
              c.Type == ClaimTypes.NameIdentifier))
             {
                 this.HttpContext.Response.StatusCode = 401;
@@ -135,24 +142,26 @@ namespace Conduit.Controllers
                 authErrorResponse.addErrorKey("Missing authentication");
                 return Json(authErrorResponse);
             }
-            string authUsername = tokenUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            var findUserResult = await _userManager.FindByNameAsync(authUsername);
-            if(null == findUserResult.UserName)
+            string authedUsername = authedUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var authedUserInDatabase = await _userManager.FindByNameAsync(authedUsername);
+            if(null == authedUserInDatabase.UserName)
             {
                 this.HttpContext.Response.StatusCode = 404;
                 var noUserErrorResponse = new ErrorResponse();
                 noUserErrorResponse.addErrorKey("No user found with the specified username");
                 return Json(noUserErrorResponse);
             }
-            findUserResult.Image = !String.IsNullOrWhiteSpace(user.Image) ? user.Image : findUserResult.Image;
-            findUserResult.Bio = !String.IsNullOrWhiteSpace(user.Bio) ? user.Bio : findUserResult.Bio;
-            findUserResult.Email = !String.IsNullOrWhiteSpace(user.Email) ? user.Email : findUserResult.Email;
-            var updateUserResult = await _userManager.UpdateAsync(findUserResult);
+            ApplicationUser user = userHTTPTransferObject.User;
+            authedUserInDatabase.Image = !String.IsNullOrWhiteSpace(user.Image) ? user.Image : authedUserInDatabase.Image;
+            authedUserInDatabase.Bio = !String.IsNullOrWhiteSpace(user.Bio) ? user.Bio : authedUserInDatabase.Bio;
+            authedUserInDatabase.Email = !String.IsNullOrWhiteSpace(user.Email) ? user.Email : authedUserInDatabase.Email;
+            var updateUserResult = await _userManager.UpdateAsync(authedUserInDatabase);
             if(updateUserResult.Succeeded)
             {
-                user = findUserResult;
+                user = authedUserInDatabase;
                 user.Password = null;
-                return Ok(user);
+                userHTTPTransferObject.User = user;
+                return Ok(userHTTPTransferObject);
             }
             this.HttpContext.Response.StatusCode = 422;
             var updateUserErrorResponse = new ErrorResponse();

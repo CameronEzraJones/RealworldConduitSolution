@@ -45,7 +45,6 @@ namespace Conduit.Migrations
                     Body = table.Column<string>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: false),
-                    MyProperty = table.Column<int>(nullable: false),
                     Slug = table.Column<string>(nullable: false),
                     Title = table.Column<string>(nullable: false),
                     UpdatedAt = table.Column<DateTime>(nullable: false)

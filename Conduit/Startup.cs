@@ -59,9 +59,25 @@ namespace Conduit
                         ValidAudience = Configuration["JWTIssuer"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWTKey"]))
                     };
+                    options.Events = new JwtBearerEvents()
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            string auth = context.Request.Headers["Authorization"];
+                            if (auth?.StartsWith("Token ", StringComparison.OrdinalIgnoreCase) ?? false)
+                            {
+                                context.Request.Headers["Authorization"] = "Bearer " + auth.Substring("Token ".Length).Trim();
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
-            services.AddMvc();
+            services.AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-ddThh:mm:ss.fffZ";
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

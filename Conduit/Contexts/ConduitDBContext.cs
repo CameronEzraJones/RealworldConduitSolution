@@ -23,6 +23,7 @@ namespace Conduit.Contexts
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.Entity<Profile>().HasKey(e => e.Id);
             builder.Entity<UserIsFollowing>()
                 .HasKey(e => new { e.UserId, e.IsFollowingId });
             builder.Entity<Article>()

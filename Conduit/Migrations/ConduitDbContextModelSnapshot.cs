@@ -92,8 +92,6 @@ namespace Conduit.Migrations
                     b.Property<string>("Description")
                         .IsRequired();
 
-                    b.Property<int>("MyProperty");
-
                     b.Property<string>("Slug")
                         .IsRequired();
 
@@ -374,7 +372,7 @@ namespace Conduit.Migrations
                         .HasForeignKey("ApplicationUserId");
 
                     b.HasOne("Conduit.Models.Article", "Article")
-                        .WithMany("Comments")
+                        .WithMany()
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
